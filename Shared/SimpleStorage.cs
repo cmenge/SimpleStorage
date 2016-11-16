@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -162,23 +163,20 @@ namespace PerpetualEngine.Storage
         // taken from http://stackoverflow.com/questions/2861722/binary-serialization-and-deserialization-without-creating-files-via-strings
         internal static string SerializeObject<T>(T o)
         {
-            using (var stream = new MemoryStream()) {
-                new BinaryFormatter().Serialize(stream, o);
-                return Convert.ToBase64String(stream.ToArray());
-            }
+            return JsonConvert.SerializeObject(o);
         }
 
         // taken from http://stackoverflow.com/questions/2861722/binary-serialization-and-deserialization-without-creating-files-via-strings
         internal static T DeserializeObject<T>(string str)
         {
-            using (var stream = new MemoryStream(Convert.FromBase64String(str))) {
-                try {
-                    Environment.SetEnvironmentVariable("MONO_REFLECTION_SERIALIZER", "yes");
-                    return (T)new BinaryFormatter().Deserialize(stream);
-                } catch (Exception e) {
-                    Console.WriteLine("SimpleStorage: " + e.Message);
-                    return default(T);
-                }
+            try
+            {
+                return (T)JsonConvert.DeserializeObject(str);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("SimpleStorage: " + e.Message);
+                return default(T);
             }
         }
     }
